@@ -53,11 +53,13 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
+      // Corregido: usamos error.issues en lugar de error.errors
       return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
+        { error: 'Datos inválidos', details: error.issues },
         { status: 400 }
       );
     }
+
     console.error('Error en registro:', error);
     return NextResponse.json(
       { error: 'Error al registrar usuario' },
