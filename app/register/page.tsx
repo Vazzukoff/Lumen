@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthForm from '@/UI/auth.form';
-import { loginSchema } from '@/lib/validations/auth';
+import { registerSchema } from '@/lib/validations/auth';
 import { z } from 'zod';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
+    age: '',
+    gender: '',
+    country: '',
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
@@ -23,6 +27,8 @@ export default function LoginPage() {
       ...prev,
       [name]: value,
     }));
+    
+    // Limpiar error del campo cuando el usuario empieza a escribir
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
         ...prev,
@@ -40,10 +46,10 @@ export default function LoginPage() {
 
     try {
       // Validar con Zod
-      const validatedData = loginSchema.parse(formData);
+      const validatedData = registerSchema.parse(formData);
 
       // Llamar a la API
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,18 +60,19 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Error al iniciar sesión');
+        setError(data.error || 'Error al registrar usuario');
         setIsSubmitting(false);
         return;
       }
 
-      setSuccess('¡Login exitoso! Redirigiendo...');
+      setSuccess('¡Registro exitoso! Redirigiendo al login...');
       
       setTimeout(() => {
-        router.push('/home'); // Cambia por tu ruta
-      }, 1500);
+        router.push('/login');
+      }, 2000);
     } catch (err) {
       if (err instanceof z.ZodError) {
+        // Mapear errores de Zod a fieldErrors
         const errors: Record<string, string> = {};
         err.errors.forEach((error) => {
           if (error.path[0]) {
@@ -83,18 +90,18 @@ export default function LoginPage() {
 
   return (
     <AuthForm
-      title="Iniciar sesión"
-      buttonText={isSubmitting ? "Ingresando..." : "Ingresar"}
-      footerText="¿No tienes cuenta?"
-      footerLinkText="Regístrate"
-      footerLinkTo="/register"
+      title="Crear cuenta"
+      buttonText={isSubmitting ? "Registrando..." : "Registrarse"}
+      footerText="¿Ya tienes cuenta?"
+      footerLinkText="Inicia sesión"
+      footerLinkTo="/"
       formData={formData}
       fieldErrors={fieldErrors}
       error={error}
       success={success}
       handleChange={handleChange}
       handleSubmit={handleSubmit}
-      isRegister={false}
+      isRegister={true}
     />
   );
 }
