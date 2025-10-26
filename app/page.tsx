@@ -19,15 +19,10 @@ export default function LoginPage() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+
     if (fieldErrors[name]) {
-      setFieldErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -39,15 +34,11 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      // Validar con Zod
       const validatedData = loginSchema.parse(formData);
 
-      // Llamar a la API
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(validatedData),
       });
 
@@ -60,18 +51,20 @@ export default function LoginPage() {
       }
 
       setSuccess('¡Login exitoso! Redirigiendo...');
-      
-      setTimeout(() => {
-        router.push('/home'); // Cambia por tu ruta
-      }, 1500);
+      setTimeout(() => router.push('/home'), 1500);
     } catch (err) {
       if (err instanceof z.ZodError) {
+        const flattened = err.flatten();
         const errors: Record<string, string> = {};
-        err.errors.forEach((error) => {
-          if (error.path[0]) {
-            errors[error.path[0] as string] = error.message;
+
+        const fieldErrors = flattened.fieldErrors as Record<string, string[]>; // ✅ cast
+
+        for (const key in fieldErrors) {
+          if (fieldErrors[key] && fieldErrors[key].length > 0) {
+            errors[key] = fieldErrors[key][0];
           }
-        });
+        }
+
         setFieldErrors(errors);
       } else {
         setError('Error de conexión. Intenta de nuevo.');
@@ -84,7 +77,7 @@ export default function LoginPage() {
   return (
     <AuthForm
       title="Iniciar sesión"
-      buttonText={isSubmitting ? "Ingresando..." : "Ingresar"}
+      buttonText={isSubmitting ? 'Ingresando...' : 'Ingresar'}
       footerText="¿No tienes cuenta?"
       footerLinkText="Regístrate"
       footerLinkTo="/register"
