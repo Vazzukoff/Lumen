@@ -7,7 +7,7 @@ import Input from '@/components/input';
 import { chatService, type Message } from '@/services/chat.service';
 
 export default function LumenChat() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'lumen',
@@ -15,13 +15,14 @@ export default function LumenChat() {
       timestamp: new Date()
     }
   ]);
+
   const [isTyping, setIsTyping] = useState(false);
 
   const handleSendMessage = async (text: string) => {
-    const userMessage = {
+    const userMessage: Message = {
       id: `${Date.now()}`,
       type: 'user',
-      text: text,
+      text,
       timestamp: new Date()
     };
 
@@ -29,22 +30,24 @@ export default function LumenChat() {
     setIsTyping(true);
 
     try {
+      // Construir historial para enviar al chatService
       const history: Message[] = messages
-        .filter(msg => msg.type !== 'lumen' || msg.id !== 1)
+        .filter(msg => msg.type !== 'lumen' || msg.id !== '1')
         .map(msg => ({
+          ...msg,
           role: msg.type === 'user' ? 'user' : 'model',
           parts: msg.text
         }));
 
-      // 👇 Usa un ID de usuario real
+      // 👇 Envía mensaje con historial al servicio
       const response = await chatService.sendMessageWithHistory(
         text,
         history,
-        1, // 👈 el ID del usuario (ej. 1 o el actual)
-        "lumen-session"
+        1, // ID de usuario real
+        'lumen-session'
       );
 
-      const lumenMessage = {
+      const lumenMessage: Message = {
         id: `${Date.now()}`,
         type: 'lumen',
         text: response,
@@ -55,7 +58,7 @@ export default function LumenChat() {
     } catch (error) {
       console.error('Error al obtener respuesta:', error);
 
-      const errorMessage = {
+      const errorMessage: Message = {
         id: `${Date.now()}`,
         type: 'lumen',
         text: 'Lo siento, estoy teniendo dificultades para responder en este momento. ¿Podrías intentarlo de nuevo?',

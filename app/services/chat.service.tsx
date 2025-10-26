@@ -1,8 +1,13 @@
 "use client";
 
 export interface Message {
-  role: "user" | "model";
-  parts: string;
+  id: string;
+  type: "user" | "lumen";
+  text: string;
+  timestamp: Date;
+  // Opcional: estas propiedades se usan al construir history
+  role?: "user" | "model";
+  parts?: string;
 }
 
 class ChatService {
