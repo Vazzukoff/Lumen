@@ -40,13 +40,13 @@ export default function Chat({ messages, isTyping }: ChatProps) {
             <div
               className={`max-w-[75%] ${
                 message.type === "user"
-                  ? "bg-gradient-to-br from-purple-400 to-indigo-400 text-white"
+                  ? "bg-linear-to-br from-purple-400 to-indigo-400 text-white"
                   : "bg-white text-gray-800"
               } rounded-3xl px-6 py-4 shadow-sm`}
             >
               {message.type === "lumen" && (
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-300 to-indigo-300 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-linear-to-br from-purple-300 to-indigo-300 flex items-center justify-center">
                     <LuSparkles className="w-3 h-3 text-white" />
                   </div>
                   <span className="text-xs font-medium text-purple-600">
@@ -65,7 +65,7 @@ export default function Chat({ messages, isTyping }: ChatProps) {
           <div className="flex justify-start animate-fadeIn">
             <div className="bg-white rounded-3xl px-6 py-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-300 to-indigo-300 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-linear-to-br from-purple-300 to-indigo-300 flex items-center justify-center">
                   <LuSparkles className="w-3 h-3 text-white" />
                 </div>
                 <span className="text-xs font-medium text-purple-600">

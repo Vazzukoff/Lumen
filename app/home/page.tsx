@@ -9,7 +9,7 @@ import { chatService, type Message } from '@/services/chat.service';
 export default function LumenChat() {
   const [messages, setMessages] = useState([
     {
-      id: 1,
+      id: '1',
       type: 'lumen',
       text: 'Hola, bienvenido/a a Lumen. 🌙\n\nEste es tu espacio seguro. Aquí puedes expresar lo que sientes sin ser juzgado.\n\n¿Cómo te sientes hoy?',
       timestamp: new Date()
@@ -19,7 +19,7 @@ export default function LumenChat() {
 
   const handleSendMessage = async (text: string) => {
     const userMessage = {
-      id: messages.length + 1,
+      id: `${Date.now()}`,
       type: 'user',
       text: text,
       timestamp: new Date()
@@ -45,7 +45,7 @@ export default function LumenChat() {
       );
 
       const lumenMessage = {
-        id: messages.length + 2,
+        id: `${Date.now()}`,
         type: 'lumen',
         text: response,
         timestamp: new Date()
@@ -56,7 +56,7 @@ export default function LumenChat() {
       console.error('Error al obtener respuesta:', error);
 
       const errorMessage = {
-        id: messages.length + 2,
+        id: `${Date.now()}`,
         type: 'lumen',
         text: 'Lo siento, estoy teniendo dificultades para responder en este momento. ¿Podrías intentarlo de nuevo?',
         timestamp: new Date()
