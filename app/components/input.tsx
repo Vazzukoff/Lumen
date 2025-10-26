@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
 
-export default function Input({ onSend }) {
-  const [input, setInput] = useState('');
-  const textareaRef = useRef(null);
+// Definir tipo de props
+type InputProps = {
+  onSend: (message: string) => void;
+};
+
+export default function Input({ onSend }: InputProps) {
+  const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    onSend(input);
-    setInput('');
+    onSend(input.trim());
+    setInput("");
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -23,8 +28,8 @@ export default function Input({ onSend }) {
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
     }
   };
 
