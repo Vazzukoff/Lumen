@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,17 +23,10 @@ export default function RegisterPage() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-    
-    // Limpiar error del campo cuando el usuario empieza a escribir
+    setFormData(prev => ({ ...prev, [name]: value }));
+
     if (fieldErrors[name]) {
-      setFieldErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -45,15 +38,11 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      // Validar con Zod
       const validatedData = registerSchema.parse(formData);
 
-      // Llamar a la API
       const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(validatedData),
       });
 
@@ -66,19 +55,19 @@ export default function RegisterPage() {
       }
 
       setSuccess('¡Registro exitoso! Redirigiendo al login...');
-      
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
+      setTimeout(() => router.push('/login'), 2000);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        // Mapear errores de Zod a fieldErrors
+        const flattened = err.flatten();
         const errors: Record<string, string> = {};
-        err.errors.forEach((error) => {
-          if (error.path[0]) {
-            errors[error.path[0] as string] = error.message;
+        const fieldErrors = flattened.fieldErrors as Record<string, string[]>;
+
+        for (const key in fieldErrors) {
+          if (fieldErrors[key] && fieldErrors[key].length > 0) {
+            errors[key] = fieldErrors[key][0];
           }
-        });
+        }
+
         setFieldErrors(errors);
       } else {
         setError('Error de conexión. Intenta de nuevo.');
@@ -91,7 +80,7 @@ export default function RegisterPage() {
   return (
     <AuthForm
       title="Crear cuenta"
-      buttonText={isSubmitting ? "Registrando..." : "Registrarse"}
+      buttonText={isSubmitting ? 'Registrando...' : 'Registrarse'}
       footerText="¿Ya tienes cuenta?"
       footerLinkText="Inicia sesión"
       footerLinkTo="/"
