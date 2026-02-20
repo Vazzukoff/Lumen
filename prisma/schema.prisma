@@ -8,16 +8,154 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ======================================================
+//  USUARIO PRINCIPAL (usado por NextAuth)
+// ======================================================
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
+  id         String   @id @default(cuid())
+  name       String?
   email      String   @unique
   password   String
-  age        Int?
-  gender     String?
-  country    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  // Relaciones NextAuth (no las borres, las necesita internamente)
+  accounts Account[]
+  sessions Session[]
+  profile  UserProfile?
+
+  // Relación con Subscription
+  subscription Subscription?
+  
+  // ⭐ Relación con MessageUsage (registrados)
+  messageUsage MessageUsage?
+
   @@map("users")
+}
+
+// ======================================================
+//  PERFIL DE USUARIO (info personal)
+// ======================================================
+model UserProfile {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  birthDate DateTime?
+  gender    String?
+  country   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// ======================================================
+//  ⭐ NUEVO: USAGE DE MENSAJES (para usuarios registrados)
+// ======================================================
+model MessageUsage {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  messagesSent    Int      @default(0)
+  maxMessages     Int      @default(1) // Mensajes gratis post-registro (configurable)
+  usageStartedAt  DateTime @default(now())
+  lastMessageAt   DateTime?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("message_usage")
+}
+
+// ======================================================
+//  ⭐ NUEVO: ANONYMOUS TRIAL (visitantes sin registro)
+// ======================================================
+model AnonymousTrial {
+  id              String   @id @default(cuid())
+  identifier      String   @unique // Puede ser IP, fingerprint, sessionId, etc.
+  messagesSent    Int      @default(0)
+  maxMessages     Int      @default(1) // Mensajes antes de pedir registro
+  trialStartedAt  DateTime @default(now())
+  lastMessageAt   DateTime?
+  
+  @@index([identifier])
+  @@index([trialStartedAt])
+  @@map("anonymous_trials")
+}
+
+// ======================================================
+//  PLANES DE SUSCRIPCIÓN
+// ======================================================
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  price       Float
+  duration    Int?     @default(30) // Duración en días
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+// ======================================================
+//  SUSCRIPCIONES
+// ======================================================
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  planId     String
+  status     String   @default("active") // active, cancelled, expired, paused
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  expires_at DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@index([expires_at])
+  @@map("subscriptions")
+}
+
+// ======================================================
+//  TABLAS DE NEXTAUTH (no tocar)
+// ======================================================
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

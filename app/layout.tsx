@@ -1,11 +1,13 @@
-// app/login/layout.tsx
-import './globals.css';
+"use client";
 
-export default function LoginLayout({ children }: { children: React.ReactNode }) {
+import './globals.css';
+import { SessionProvider } from 'next-auth/react';
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body>
-        {children}
+      <body className="bg-background text-foreground antialiased">
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
